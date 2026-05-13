@@ -61,6 +61,7 @@ input, select{
     border:1px solid #ccc;
     border-radius:6px;
     font-size:14px;
+    box-sizing:border-box;
 }
 
 button{
@@ -195,6 +196,7 @@ th{
 
             <div>
                 <label>Rep Name</label>
+
                 <select id="repName">
                     <option>HESHAN</option>
                     <option>SANDUN</option>
@@ -216,6 +218,7 @@ th{
 
             <div>
                 <label>Sales Category</label>
+
                 <select id="salesCategory">
                     <option>Direct Trade</option>
                     <option>Modern Trade</option>
@@ -225,26 +228,41 @@ th{
 
             <div>
                 <label>Date</label>
+
                 <input type="date" id="date">
             </div>
 
             <div>
                 <label>Duty On</label>
-                <input type="time" id="dutyOn">
+
+                <select id="dutyOnType" onchange="toggleDutyOn()">
+                    <option value="TIME">Select Time</option>
+                    <option value="NO RECORD">No Record</option>
+                </select>
+
+                <input type="time" id="dutyOn" style="margin-top:8px;">
             </div>
 
             <div>
                 <label>Duty Off</label>
-                <input type="time" id="dutyOff">
+
+                <select id="dutyOffType" onchange="toggleDutyOff()">
+                    <option value="TIME">Select Time</option>
+                    <option value="NO RECORD">No Record</option>
+                </select>
+
+                <input type="time" id="dutyOff" style="margin-top:8px;">
             </div>
 
             <div>
                 <label>Area of Visit</label>
+
                 <input type="text" id="areaVisit">
             </div>
 
             <div>
                 <label>Distance from Starting Town (KM)</label>
+
                 <input type="number" id="distance">
             </div>
 
@@ -299,6 +317,48 @@ th{
 
 let records = [];
 let editIndex = -1;
+
+function toggleDutyOn(){
+
+    const type =
+        document.getElementById("dutyOnType").value;
+
+    const input =
+        document.getElementById("dutyOn");
+
+    if(type === "NO RECORD"){
+
+        input.value = "";
+        input.disabled = true;
+
+    }else{
+
+        input.disabled = false;
+
+    }
+
+}
+
+function toggleDutyOff(){
+
+    const type =
+        document.getElementById("dutyOffType").value;
+
+    const input =
+        document.getElementById("dutyOff");
+
+    if(type === "NO RECORD"){
+
+        input.value = "";
+        input.disabled = true;
+
+    }else{
+
+        input.disabled = false;
+
+    }
+
+}
 
 function getDutyOnStatus(time){
 
@@ -362,14 +422,34 @@ function getDistanceStatus(distance){
 function getFormData(){
 
     return {
-        repName: document.getElementById("repName").value,
-        salesCategory: document.getElementById("salesCategory").value,
-        date: document.getElementById("date").value,
-        dutyOn: document.getElementById("dutyOn").value,
-        dutyOff: document.getElementById("dutyOff").value,
-        areaVisit: document.getElementById("areaVisit").value,
-        distance: document.getElementById("distance").value
+
+        repName:
+            document.getElementById("repName").value,
+
+        salesCategory:
+            document.getElementById("salesCategory").value,
+
+        date:
+            document.getElementById("date").value,
+
+        dutyOn:
+            document.getElementById("dutyOnType").value === "NO RECORD"
+            ? ""
+            : document.getElementById("dutyOn").value,
+
+        dutyOff:
+            document.getElementById("dutyOffType").value === "NO RECORD"
+            ? ""
+            : document.getElementById("dutyOff").value,
+
+        areaVisit:
+            document.getElementById("areaVisit").value,
+
+        distance:
+            document.getElementById("distance").value
+
     };
+
 }
 
 function clearForm(){
@@ -379,6 +459,12 @@ function clearForm(){
     document.getElementById("dutyOff").value = "";
     document.getElementById("areaVisit").value = "";
     document.getElementById("distance").value = "";
+
+    document.getElementById("dutyOnType").value = "TIME";
+    document.getElementById("dutyOffType").value = "TIME";
+
+    document.getElementById("dutyOn").disabled = false;
+    document.getElementById("dutyOff").disabled = false;
 
 }
 
@@ -390,6 +476,7 @@ function addRecord(){
 
         alert("Please fill required fields");
         return;
+
     }
 
     records.push(data);
@@ -421,6 +508,7 @@ function renderCategoryWiseReport(){
         if(filtered.length > 0){
 
             html += `
+
                 <div class="category-title">
                     ${category}
                 </div>
@@ -430,6 +518,7 @@ function renderCategoryWiseReport(){
                     <thead>
 
                         <tr>
+
                             <th>Rep Name</th>
                             <th>Date</th>
                             <th>Duty On</th>
@@ -440,11 +529,13 @@ function renderCategoryWiseReport(){
                             <th>Distance</th>
                             <th>Distance Status</th>
                             <th>Actions</th>
+
                         </tr>
 
                     </thead>
 
                     <tbody>
+
             `;
 
             filtered.forEach(record => {
@@ -462,6 +553,7 @@ function renderCategoryWiseReport(){
                     getDistanceStatus(Number(record.distance));
 
                 html += `
+
                     <tr>
 
                         <td>${record.repName}</td>
@@ -469,7 +561,7 @@ function renderCategoryWiseReport(){
                         <td>${record.date}</td>
 
                         <td class="${dutyOnStatus.className}">
-                            ${record.dutyOn || "NO RECORD"}
+                            ${record.dutyOn ? record.dutyOn : "NO RECORD"}
                         </td>
 
                         <td class="${dutyOnStatus.className}">
@@ -477,7 +569,7 @@ function renderCategoryWiseReport(){
                         </td>
 
                         <td class="${dutyOffStatus.className}">
-                            ${record.dutyOff || "NO RECORD"}
+                            ${record.dutyOff ? record.dutyOff : "NO RECORD"}
                         </td>
 
                         <td class="${dutyOffStatus.className}">
@@ -509,12 +601,13 @@ function renderCategoryWiseReport(){
                         </td>
 
                     </tr>
+
                 `;
+
             });
 
             html += `
                     </tbody>
-
                 </table>
             `;
         }
@@ -539,11 +632,45 @@ function editRecord(index){
     document.getElementById("date").value =
         record.date;
 
-    document.getElementById("dutyOn").value =
-        record.dutyOn;
+    if(record.dutyOn){
 
-    document.getElementById("dutyOff").value =
-        record.dutyOff;
+        document.getElementById("dutyOnType").value = "TIME";
+
+        document.getElementById("dutyOn").disabled = false;
+
+        document.getElementById("dutyOn").value =
+            record.dutyOn;
+
+    }else{
+
+        document.getElementById("dutyOnType").value =
+            "NO RECORD";
+
+        document.getElementById("dutyOn").value = "";
+
+        document.getElementById("dutyOn").disabled = true;
+
+    }
+
+    if(record.dutyOff){
+
+        document.getElementById("dutyOffType").value = "TIME";
+
+        document.getElementById("dutyOff").disabled = false;
+
+        document.getElementById("dutyOff").value =
+            record.dutyOff;
+
+    }else{
+
+        document.getElementById("dutyOffType").value =
+            "NO RECORD";
+
+        document.getElementById("dutyOff").value = "";
+
+        document.getElementById("dutyOff").disabled = true;
+
+    }
 
     document.getElementById("areaVisit").value =
         record.areaVisit;
