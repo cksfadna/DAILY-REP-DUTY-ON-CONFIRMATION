@@ -3,124 +3,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Duty On/Off Report Portal</title>
+
+<title>Duty On / Off Report Portal</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
-    body{
-        font-family: Arial, sans-serif;
-        background:#f4f6f9;
-        margin:0;
-        padding:20px;
-    }
 
-    .container{
-        max-width:1400px;
-        margin:auto;
-    }
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+}
 
-    h1{
-        text-align:center;
-        color:#1d3557;
-        margin-bottom:5px;
-    }
+.container{
+    max-width:1400px;
+    margin:auto;
+}
 
-    h3{
-        text-align:center;
-        color:#555;
-        margin-top:0;
-        margin-bottom:30px;
-    }
+h1{
+    text-align:center;
+    color:#1d3557;
+    margin-bottom:5px;
+}
 
-    .form-section{
-        background:#fff;
-        padding:20px;
-        border-radius:10px;
-        box-shadow:0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom:25px;
-    }
+h3{
+    text-align:center;
+    color:#666;
+    margin-top:0;
+    margin-bottom:25px;
+}
 
-    .form-grid{
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-        gap:15px;
-    }
+.form-section{
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom:25px;
+}
 
-    label{
-        font-weight:bold;
-        display:block;
-        margin-bottom:5px;
-    }
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
 
-    input, select{
-        width:100%;
-        padding:10px;
-        border:1px solid #ccc;
-        border-radius:6px;
-        font-size:14px;
-    }
+label{
+    font-weight:bold;
+    display:block;
+    margin-bottom:5px;
+}
 
-    button{
-        background:#1d3557;
-        color:white;
-        border:none;
-        padding:12px 20px;
-        border-radius:6px;
-        cursor:pointer;
-        font-size:15px;
-        margin-top:20px;
-        margin-right:10px;
-    }
+input, select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:14px;
+}
 
-    button:hover{
-        background:#457b9d;
-    }
+button{
+    border:none;
+    padding:12px 18px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
+    margin-top:20px;
+    margin-right:10px;
+    color:white;
+}
 
-    .report-section{
-        background:#fff;
-        padding:20px;
-        border-radius:10px;
-        box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    }
+.add-btn{
+    background:#1d3557;
+}
 
-    table{
-        width:100%;
-        border-collapse:collapse;
-        margin-top:20px;
-    }
+.download-btn{
+    background:#198754;
+}
 
-    th, td{
-        border:1px solid #ddd;
-        padding:10px;
-        text-align:center;
-        font-size:14px;
-    }
+.reset-btn{
+    background:#dc3545;
+}
 
-    th{
-        background:#1d3557;
-        color:white;
-    }
+button:hover{
+    opacity:0.9;
+}
 
-    .green{
-        background:#b7efc5;
-        color:#006400;
-        font-weight:bold;
-    }
+.report-section{
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
 
-    .red{
-        background:#ffccd5;
-        color:#b00020;
-        font-weight:bold;
-    }
+.report-date{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:20px;
+    color:#1d3557;
+}
 
-    .category-header{
-        background:#e9ecef;
-        font-weight:bold;
-        text-align:left;
-        padding:10px;
-        font-size:16px;
-    }
+.category-title{
+    background:#1d3557;
+    color:white;
+    padding:10px;
+    margin-top:25px;
+    border-radius:5px;
+    font-size:18px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+
+th, td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+    font-size:14px;
+}
+
+th{
+    background:#457b9d;
+    color:white;
+}
+
+.green{
+    background:#b7efc5;
+    color:#006400;
+    font-weight:bold;
+}
+
+.red{
+    background:#ffccd5;
+    color:#b00020;
+    font-weight:bold;
+}
 
 </style>
 </head>
@@ -188,46 +209,38 @@
 
             <div>
                 <label>Distance from Starting Town (KM)</label>
-                <input type="number" id="distance" placeholder="Enter KM">
+                <input type="number" id="distance">
             </div>
 
         </div>
 
-        <button onclick="addRecord()">Add Record</button>
-        <button onclick="downloadPNG()">Download Report PNG</button>
+        <button class="add-btn" onclick="addRecord()">Add Record</button>
+
+        <button class="download-btn" onclick="downloadPNG()">
+            Download PNG
+        </button>
+
+        <button class="reset-btn" onclick="resetReport()">
+            Reset Report
+        </button>
 
     </div>
 
     <div class="report-section" id="reportSection">
 
-        <table id="reportTable">
+        <div class="report-date" id="reportDate">
+            Report Date : -
+        </div>
 
-            <thead>
-                <tr>
-                    <th>Rep Name</th>
-                    <th>Sales Category</th>
-                    <th>Date</th>
-                    <th>Duty On</th>
-                    <th>Duty On Status</th>
-                    <th>Duty Off</th>
-                    <th>Duty Off Status</th>
-                    <th>Area of Visit</th>
-                    <th>Distance (KM)</th>
-                    <th>Distance Status</th>
-                </tr>
-            </thead>
-
-            <tbody id="tableBody">
-
-            </tbody>
-
-        </table>
+        <div id="categoryReports"></div>
 
     </div>
 
 </div>
 
 <script>
+
+let records = [];
 
 function getDutyOnStatus(time){
 
@@ -289,47 +302,155 @@ function addRecord(){
         return;
     }
 
-    const dutyOnStatus = getDutyOnStatus(dutyOn);
-    const dutyOffStatus = getDutyOffStatus(dutyOff);
-    const distanceStatus = getDistanceStatus(Number(distance));
+    document.getElementById("reportDate").innerHTML =
+        "Report Date : " + date;
 
-    const tableBody = document.getElementById("tableBody");
+    records.push({
+        repName,
+        salesCategory,
+        date,
+        dutyOn,
+        dutyOff,
+        areaVisit,
+        distance
+    });
 
-    const row = `
-        <tr>
-            <td>${repName}</td>
-            <td>${salesCategory}</td>
-            <td>${date}</td>
+    renderCategoryWiseReport();
 
-            <td class="${dutyOnStatus.className}">${dutyOn}</td>
-            <td class="${dutyOnStatus.className}">${dutyOnStatus.text}</td>
+}
 
-            <td class="${dutyOffStatus.className}">${dutyOff}</td>
-            <td class="${dutyOffStatus.className}">${dutyOffStatus.text}</td>
+function renderCategoryWiseReport(){
 
-            <td>${areaVisit}</td>
+    const categories = [
+        "Direct Trade",
+        "Modern Trade",
+        "Salon"
+    ];
 
-            <td class="${distanceStatus.className}">${distance}</td>
-            <td class="${distanceStatus.className}">${distanceStatus.text}</td>
-        </tr>
-    `;
+    let html = "";
 
-    tableBody.innerHTML += row;
+    categories.forEach(category => {
+
+        const filtered = records.filter(
+            record => record.salesCategory === category
+        );
+
+        if(filtered.length > 0){
+
+            html += `
+                <div class="category-title">
+                    ${category}
+                </div>
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Rep Name</th>
+                            <th>Date</th>
+                            <th>Duty On</th>
+                            <th>Duty On Status</th>
+                            <th>Duty Off</th>
+                            <th>Duty Off Status</th>
+                            <th>Area of Visit</th>
+                            <th>Distance (KM)</th>
+                            <th>Distance Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+            `;
+
+            filtered.forEach(record => {
+
+                const dutyOnStatus =
+                    getDutyOnStatus(record.dutyOn);
+
+                const dutyOffStatus =
+                    getDutyOffStatus(record.dutyOff);
+
+                const distanceStatus =
+                    getDistanceStatus(Number(record.distance));
+
+                html += `
+                    <tr>
+
+                        <td>${record.repName}</td>
+
+                        <td>${record.date}</td>
+
+                        <td class="${dutyOnStatus.className}">
+                            ${record.dutyOn}
+                        </td>
+
+                        <td class="${dutyOnStatus.className}">
+                            ${dutyOnStatus.text}
+                        </td>
+
+                        <td class="${dutyOffStatus.className}">
+                            ${record.dutyOff}
+                        </td>
+
+                        <td class="${dutyOffStatus.className}">
+                            ${dutyOffStatus.text}
+                        </td>
+
+                        <td>${record.areaVisit}</td>
+
+                        <td class="${distanceStatus.className}">
+                            ${record.distance}
+                        </td>
+
+                        <td class="${distanceStatus.className}">
+                            ${distanceStatus.text}
+                        </td>
+
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+        }
+
+    });
+
+    document.getElementById("categoryReports").innerHTML = html;
 
 }
 
 function downloadPNG(){
 
-    html2canvas(document.querySelector("#reportSection")).then(canvas => {
+    html2canvas(
+        document.querySelector("#reportSection")
+    ).then(canvas => {
 
         const link = document.createElement("a");
 
         link.download = "Duty_On_Off_Report.png";
+
         link.href = canvas.toDataURL();
 
         link.click();
 
     });
+
+}
+
+function resetReport(){
+
+    if(confirm("Are you sure to reset report?")){
+
+        records = [];
+
+        document.getElementById("categoryReports").innerHTML = "";
+
+        document.getElementById("reportDate").innerHTML =
+            "Report Date : -";
+
+    }
 
 }
 
