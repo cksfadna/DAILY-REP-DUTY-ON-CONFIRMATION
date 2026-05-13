@@ -18,7 +18,7 @@ body{
 }
 
 .container{
-    max-width:1400px;
+    max-width:1450px;
     margin:auto;
 }
 
@@ -86,6 +86,22 @@ button{
     background:#dc3545;
 }
 
+.update-btn{
+    background:#ff9800;
+}
+
+.edit-btn{
+    background:#0d6efd;
+    padding:8px 12px;
+    font-size:13px;
+}
+
+.delete-btn{
+    background:#dc3545;
+    padding:8px 12px;
+    font-size:13px;
+}
+
 button:hover{
     opacity:0.9;
 }
@@ -141,6 +157,10 @@ th{
     background:#ffccd5;
     color:#b00020;
     font-weight:bold;
+}
+
+.hidden{
+    display:none;
 }
 
 </style>
@@ -214,7 +234,14 @@ th{
 
         </div>
 
-        <button class="add-btn" onclick="addRecord()">Add Record</button>
+        <button class="add-btn" onclick="addRecord()">
+            Add Record
+        </button>
+
+        <button class="update-btn hidden" id="updateButton"
+            onclick="updateRecord()">
+            Update Record
+        </button>
 
         <button class="download-btn" onclick="downloadPNG()">
             Download PNG
@@ -241,6 +268,7 @@ th{
 <script>
 
 let records = [];
+let editIndex = -1;
 
 function getDutyOnStatus(time){
 
@@ -287,35 +315,48 @@ function getDistanceStatus(distance){
     }
 }
 
+function getFormData(){
+
+    return {
+        repName: document.getElementById("repName").value,
+        salesCategory: document.getElementById("salesCategory").value,
+        date: document.getElementById("date").value,
+        dutyOn: document.getElementById("dutyOn").value,
+        dutyOff: document.getElementById("dutyOff").value,
+        areaVisit: document.getElementById("areaVisit").value,
+        distance: document.getElementById("distance").value
+    };
+}
+
+function clearForm(){
+
+    document.getElementById("date").value = "";
+    document.getElementById("dutyOn").value = "";
+    document.getElementById("dutyOff").value = "";
+    document.getElementById("areaVisit").value = "";
+    document.getElementById("distance").value = "";
+
+}
+
 function addRecord(){
 
-    const repName = document.getElementById("repName").value;
-    const salesCategory = document.getElementById("salesCategory").value;
-    const date = document.getElementById("date").value;
-    const dutyOn = document.getElementById("dutyOn").value;
-    const dutyOff = document.getElementById("dutyOff").value;
-    const areaVisit = document.getElementById("areaVisit").value;
-    const distance = document.getElementById("distance").value;
+    const data = getFormData();
 
-    if(!date || !dutyOn || !dutyOff || !areaVisit || !distance){
+    if(!data.date || !data.dutyOn || !data.dutyOff ||
+       !data.areaVisit || !data.distance){
+
         alert("Please fill all fields");
         return;
     }
 
-    document.getElementById("reportDate").innerHTML =
-        "Report Date : " + date;
+    records.push(data);
 
-    records.push({
-        repName,
-        salesCategory,
-        date,
-        dutyOn,
-        dutyOff,
-        areaVisit,
-        distance
-    });
+    document.getElementById("reportDate").innerHTML =
+        "Report Date : " + data.date;
 
     renderCategoryWiseReport();
+
+    clearForm();
 
 }
 
@@ -331,9 +372,8 @@ function renderCategoryWiseReport(){
 
     categories.forEach(category => {
 
-        const filtered = records.filter(
-            record => record.salesCategory === category
-        );
+        const filtered =
+            records.filter(r => r.salesCategory === category);
 
         if(filtered.length > 0){
 
@@ -345,6 +385,7 @@ function renderCategoryWiseReport(){
                 <table>
 
                     <thead>
+
                         <tr>
                             <th>Rep Name</th>
                             <th>Date</th>
@@ -353,15 +394,20 @@ function renderCategoryWiseReport(){
                             <th>Duty Off</th>
                             <th>Duty Off Status</th>
                             <th>Area of Visit</th>
-                            <th>Distance (KM)</th>
+                            <th>Distance</th>
                             <th>Distance Status</th>
+                            <th>Actions</th>
                         </tr>
+
                     </thead>
 
                     <tbody>
             `;
 
             filtered.forEach(record => {
+
+                const actualIndex =
+                    records.indexOf(record);
 
                 const dutyOnStatus =
                     getDutyOnStatus(record.dutyOn);
@@ -398,11 +444,25 @@ function renderCategoryWiseReport(){
                         <td>${record.areaVisit}</td>
 
                         <td class="${distanceStatus.className}">
-                            ${record.distance}
+                            ${record.distance} KM
                         </td>
 
                         <td class="${distanceStatus.className}">
                             ${distanceStatus.text}
+                        </td>
+
+                        <td>
+
+                            <button class="edit-btn"
+                                onclick="editRecord(${actualIndex})">
+                                Edit
+                            </button>
+
+                            <button class="delete-btn"
+                                onclick="deleteRecord(${actualIndex})">
+                                Delete
+                            </button>
+
                         </td>
 
                     </tr>
@@ -411,13 +471,96 @@ function renderCategoryWiseReport(){
 
             html += `
                     </tbody>
+
                 </table>
             `;
         }
 
     });
 
-    document.getElementById("categoryReports").innerHTML = html;
+    document.getElementById("categoryReports").innerHTML =
+        html;
+
+}
+
+function editRecord(index){
+
+    const record = records[index];
+
+    document.getElementById("repName").value =
+        record.repName;
+
+    document.getElementById("salesCategory").value =
+        record.salesCategory;
+
+    document.getElementById("date").value =
+        record.date;
+
+    document.getElementById("dutyOn").value =
+        record.dutyOn;
+
+    document.getElementById("dutyOff").value =
+        record.dutyOff;
+
+    document.getElementById("areaVisit").value =
+        record.areaVisit;
+
+    document.getElementById("distance").value =
+        record.distance;
+
+    editIndex = index;
+
+    document.getElementById("updateButton")
+        .classList.remove("hidden");
+
+}
+
+function updateRecord(){
+
+    if(editIndex === -1){
+        return;
+    }
+
+    records[editIndex] = getFormData();
+
+    renderCategoryWiseReport();
+
+    clearForm();
+
+    editIndex = -1;
+
+    document.getElementById("updateButton")
+        .classList.add("hidden");
+
+}
+
+function deleteRecord(index){
+
+    if(confirm("Delete this record?")){
+
+        records.splice(index,1);
+
+        renderCategoryWiseReport();
+
+    }
+
+}
+
+function resetReport(){
+
+    if(confirm("Reset all records?")){
+
+        records = [];
+
+        document.getElementById("categoryReports")
+            .innerHTML = "";
+
+        document.getElementById("reportDate")
+            .innerHTML = "Report Date : -";
+
+        clearForm();
+
+    }
 
 }
 
@@ -436,21 +579,6 @@ function downloadPNG(){
         link.click();
 
     });
-
-}
-
-function resetReport(){
-
-    if(confirm("Are you sure to reset report?")){
-
-        records = [];
-
-        document.getElementById("categoryReports").innerHTML = "";
-
-        document.getElementById("reportDate").innerHTML =
-            "Report Date : -";
-
-    }
 
 }
 
