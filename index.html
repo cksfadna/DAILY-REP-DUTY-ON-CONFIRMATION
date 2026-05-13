@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Duty On/Off Report Portal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#f4f6f9;
+        margin:0;
+        padding:20px;
+    }
+
+    .container{
+        max-width:1200px;
+        margin:auto;
+    }
+
+    h1{
+        text-align:center;
+        color:#1f2937;
+        margin-bottom:20px;
+    }
+
+    .card{
+        background:white;
+        padding:20px;
+        border-radius:12px;
+        box-shadow:0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom:20px;
+    }
+
+    .form-grid{
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+        gap:15px;
+    }
+
+    label{
+        font-weight:bold;
+        display:block;
+        margin-bottom:5px;
+    }
+
+    input, select{
+        width:100%;
+        padding:10px;
+        border:1px solid #ccc;
+        border-radius:8px;
+        font-size:14px;
+    }
+
+    button{
+        padding:12px 20px;
+        border:none;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:15px;
+        font-weight:bold;
+    }
+
+    .btn-add{
+        background:#2563eb;
+        color:white;
+    }
+
+    .btn-download{
+        background:#059669;
+        color:white;
+    }
+
+    .button-group{
+        margin-top:20px;
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+    }
+
+    table{
+        width:100%;
+        border-collapse:collapse;
+        margin-top:20px;
+    }
+
+    th{
+        background:#1f2937;
+        color:white;
+        padding:12px;
+        font-size:14px;
+    }
+
+    td{
+        padding:10px;
+        border:1px solid #ddd;
+        text-align:center;
+        font-size:14px;
+    }
+
+    .green{
+        background:#22c55e;
+        color:white;
+        font-weight:bold;
+    }
+
+    .red{
+        background:#ef4444;
+        color:white;
+        font-weight:bold;
+    }
+
+    .summary-box{
+        display:grid;
+        grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+        gap:15px;
+        margin-top:20px;
+    }
+
+    .summary{
+        background:#e5e7eb;
+        padding:15px;
+        border-radius:10px;
+        text-align:center;
+        font-weight:bold;
+        font-size:16px;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Duty On / Duty Off Report Portal</h1>
+
+    <div class="card">
+
+        <div class="form-grid">
+
+            <div>
+                <label>Rep Name</label>
+                <select id="repName">
+                    <option>HESHAN</option>
+                    <option>SANDUN</option>
+                    <option>SAMEERA</option>
+                    <option>SAMANTHA</option>
+                    <option>VIRAJ</option>
+                    <option>PATHUM</option>
+                    <option>TINUKA</option>
+                    <option>CHAMOD</option>
+                    <option>VIMUKTHI</option>
+                    <option>THARINDU</option>
+                    <option>CHAMAL</option>
+                    <option>KOLITHA</option>
+                    <option>AKISARA</option>
+                    <option>THUSHANTHA</option>
+                    <option>HIRAN</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Sales Category</label>
+                <select id="salesCategory">
+                    <option>Direct Trade</option>
+                    <option>Modern Trade</option>
+                    <option>Salon</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Date</label>
+                <input type="date" id="date">
+            </div>
+
+            <div>
+                <label>Duty On Time</label>
+                <input type="time" id="dutyOn">
+            </div>
+
+            <div>
+                <label>Duty Off Time</label>
+                <input type="time" id="dutyOff">
+            </div>
+
+            <div>
+                <label>Area of Visit</label>
+                <input type="text" id="area">
+            </div>
+
+            <div>
+                <label>Distance from Starting Town (KM)</label>
+                <input type="number" id="distance">
+            </div>
+
+        </div>
+
+        <div class="button-group">
+            <button class="btn-add" onclick="addRecord()">Add Report</button>
+            <button class="btn-download" onclick="downloadPNG()">Download PNG Report</button>
+        </div>
+
+    </div>
+
+    <div class="card" id="reportSection">
+
+        <h2>Duty Report</h2>
+
+        <table id="reportTable">
+            <thead>
+                <tr>
+                    <th>Rep Name</th>
+                    <th>Sales Category</th>
+                    <th>Date</th>
+                    <th>Duty On</th>
+                    <th>Duty On Status</th>
+                    <th>Duty Off</th>
+                    <th>Duty Off Status</th>
+                    <th>Area of Visit</th>
+                    <th>Distance from Start Point</th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+        </table>
+
+        <div class="summary-box">
+
+            <div class="summary" id="directTrade">
+                Direct Trade : 0
+            </div>
+
+            <div class="summary" id="modernTrade">
+                Modern Trade : 0
+            </div>
+
+            <div class="summary" id="salon">
+                Salon : 0
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+let records = [];
+
+function timeToMinutes(time){
+    let parts = time.split(":");
+    return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+}
+
+function checkDutyOn(time){
+
+    let minutes = timeToMinutes(time);
+
+    let start = 6 * 60 + 30;
+    let end = 9 * 60 + 30;
+
+    return minutes >= start && minutes <= end;
+}
+
+function checkDutyOff(time){
+
+    let minutes = timeToMinutes(time);
+
+    let start = 16 * 60 + 30;
+    let end = 18 * 60 + 30;
+
+    return minutes >= start && minutes <= end;
+}
+
+function addRecord(){
+
+    let repName = document.getElementById("repName").value;
+    let salesCategory = document.getElementById("salesCategory").value;
+    let date = document.getElementById("date").value;
+    let dutyOn = document.getElementById("dutyOn").value;
+    let dutyOff = document.getElementById("dutyOff").value;
+    let area = document.getElementById("area").value;
+    let distance = document.getElementById("distance").value;
+
+    if(!date || !dutyOn || !dutyOff){
+        alert("Please fill all required fields");
+        return;
+    }
+
+    let dutyOnStatus = checkDutyOn(dutyOn);
+    let dutyOffStatus = checkDutyOff(dutyOff);
+
+    let tbody = document.querySelector("#reportTable tbody");
+
+    let row = `
+        <tr>
+            <td>${repName}</td>
+            <td>${salesCategory}</td>
+            <td>${date}</td>
+
+            <td>${dutyOn}</td>
+
+            <td class="${dutyOnStatus ? 'green' : 'red'}">
+                ${dutyOnStatus ? 'IN TIME' : 'LATE'}
+            </td>
+
+            <td>${dutyOff}</td>
+
+            <td class="${dutyOffStatus ? 'green' : 'red'}">
+                ${dutyOffStatus ? 'IN TIME' : 'OUT OF RANGE'}
+            </td>
+
+            <td>${area}</td>
+
+            <td>${distance} KM</td>
+        </tr>
+    `;
+
+    tbody.innerHTML += row;
+
+    records.push(salesCategory);
+
+    updateSummary();
+
+}
+
+function updateSummary(){
+
+    let direct = records.filter(r => r === "Direct Trade").length;
+    let modern = records.filter(r => r === "Modern Trade").length;
+    let salon = records.filter(r => r === "Salon").length;
+
+    document.getElementById("directTrade").innerHTML =
+        "Direct Trade : " + direct;
+
+    document.getElementById("modernTrade").innerHTML =
+        "Modern Trade : " + modern;
+
+    document.getElementById("salon").innerHTML =
+        "Salon : " + salon;
+
+}
+
+function downloadPNG(){
+
+    html2canvas(document.querySelector("#reportSection")).then(canvas => {
+
+        let link = document.createElement("a");
+
+        link.download = "Duty_Report.png";
+
+        link.href = canvas.toDataURL();
+
+        link.click();
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
