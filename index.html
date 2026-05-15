@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +19,7 @@ body{
 }
 
 .container{
-    max-width:1450px;
+    max-width:1600px;
     margin:auto;
 }
 
@@ -188,7 +189,10 @@ th{
 <div class="container">
 
     <h1>Duty On / Off Report Portal</h1>
-    <h3>Report Created by Fadna - Administration Team</h3>
+
+    <h3>
+        Report Created by Fadna - Administration Team
+    </h3>
 
     <div class="form-section">
 
@@ -244,6 +248,25 @@ th{
             </div>
 
             <div>
+                <label>First Action Time</label>
+
+                <input type="time" id="firstActionTime">
+            </div>
+
+            <div>
+                <label>Action Type</label>
+
+                <select id="actionType">
+                    <option>Call</option>
+                    <option>Sale</option>
+                    <option>Payment</option>
+                    <option>Stock Taking</option>
+                    <option>Return</option>
+                    <option>Add Customer</option>
+                </select>
+            </div>
+
+            <div>
                 <label>Duty Off</label>
 
                 <select id="dutyOffType" onchange="toggleDutyOff()">
@@ -272,16 +295,19 @@ th{
             Add Record
         </button>
 
-        <button class="update-btn hidden" id="updateButton"
+        <button class="update-btn hidden"
+            id="updateButton"
             onclick="updateRecord()">
             Update Record
         </button>
 
-        <button class="download-btn" onclick="downloadPNG()">
+        <button class="download-btn"
+            onclick="downloadPNG()">
             Download PNG
         </button>
 
-        <button class="reset-btn" onclick="resetReport()">
+        <button class="reset-btn"
+            onclick="resetReport()">
             Reset Report
         </button>
 
@@ -316,6 +342,7 @@ th{
 <script>
 
 let records = [];
+
 let editIndex = -1;
 
 function toggleDutyOn(){
@@ -329,6 +356,7 @@ function toggleDutyOn(){
     if(type === "NO RECORD"){
 
         input.value = "";
+
         input.disabled = true;
 
     }else{
@@ -350,6 +378,7 @@ function toggleDutyOff(){
     if(type === "NO RECORD"){
 
         input.value = "";
+
         input.disabled = true;
 
     }else{
@@ -363,60 +392,130 @@ function toggleDutyOff(){
 function getDutyOnStatus(time){
 
     if(!time || time.trim() === ""){
+
         return {
             text:"NO RECORD",
             className:"red"
         };
+
     }
 
     if(time >= "06:30" && time <= "09:30"){
+
         return {
             text:"IN TIME",
             className:"green"
         };
+
     }else{
+
         return {
             text:"LATE",
             className:"red"
         };
+
     }
+
 }
 
-function getDutyOffStatus(time){
+function getDutyOffStatus(time, category){
 
     if(!time || time.trim() === ""){
+
         return {
             text:"NO RECORD",
             className:"red"
         };
+
     }
 
+    // Direct Trade
+    if(category === "Direct Trade"){
+
+        if(time >= "16:30" && time <= "17:00"){
+
+            return {
+                text:"IN TIME",
+                className:"green"
+            };
+
+        }else{
+
+            return {
+                text:"OUT OF RANGE",
+                className:"red"
+            };
+
+        }
+
+    }
+
+    // Modern Trade & Salon
     if(time >= "16:30" && time <= "18:30"){
+
         return {
             text:"IN TIME",
             className:"green"
         };
+
     }else{
+
         return {
             text:"OUT OF RANGE",
             className:"red"
         };
+
     }
+
 }
 
 function getDistanceStatus(distance){
 
     if(distance > 5){
+
         return {
             text:"OVER 5KM",
             className:"red"
         };
+
     }else{
+
         return {
             text:"NORMAL",
             className:"green"
         };
+
     }
+
+}
+
+function calculateTimeGap(dutyOn, firstAction){
+
+    if(!dutyOn || !firstAction){
+
+        return "NO RECORD";
+
+    }
+
+    const dutyOnMinutes =
+        parseInt(dutyOn.split(":")[0]) * 60 +
+        parseInt(dutyOn.split(":")[1]);
+
+    const firstActionMinutes =
+        parseInt(firstAction.split(":")[0]) * 60 +
+        parseInt(firstAction.split(":")[1]);
+
+    const difference =
+        firstActionMinutes - dutyOnMinutes;
+
+    if(difference < 0){
+
+        return "INVALID";
+
+    }
+
+    return difference + " MINS";
+
 }
 
 function getFormData(){
@@ -437,6 +536,12 @@ function getFormData(){
             ? ""
             : document.getElementById("dutyOn").value,
 
+        firstActionTime:
+            document.getElementById("firstActionTime").value,
+
+        actionType:
+            document.getElementById("actionType").value,
+
         dutyOff:
             document.getElementById("dutyOffType").value === "NO RECORD"
             ? ""
@@ -455,15 +560,25 @@ function getFormData(){
 function clearForm(){
 
     document.getElementById("date").value = "";
+
     document.getElementById("dutyOn").value = "";
+
+    document.getElementById("firstActionTime").value = "";
+
     document.getElementById("dutyOff").value = "";
+
     document.getElementById("areaVisit").value = "";
+
     document.getElementById("distance").value = "";
 
+    document.getElementById("actionType").selectedIndex = 0;
+
     document.getElementById("dutyOnType").value = "TIME";
+
     document.getElementById("dutyOffType").value = "TIME";
 
     document.getElementById("dutyOn").disabled = false;
+
     document.getElementById("dutyOff").disabled = false;
 
 }
@@ -475,6 +590,7 @@ function addRecord(){
     if(!data.date || !data.areaVisit || !data.distance){
 
         alert("Please fill required fields");
+
         return;
 
     }
@@ -503,7 +619,9 @@ function renderCategoryWiseReport(){
     categories.forEach(category => {
 
         const filtered =
-            records.filter(r => r.salesCategory === category);
+            records.filter(r =>
+                r.salesCategory === category
+            );
 
         if(filtered.length > 0){
 
@@ -523,6 +641,9 @@ function renderCategoryWiseReport(){
                             <th>Date</th>
                             <th>Duty On</th>
                             <th>Duty On Status</th>
+                            <th>First Action Time</th>
+                            <th>Action Type</th>
+                            <th>Duty On → First Action Gap</th>
                             <th>Duty Off</th>
                             <th>Duty Off Status</th>
                             <th>Area of Visit</th>
@@ -547,10 +668,21 @@ function renderCategoryWiseReport(){
                     getDutyOnStatus(record.dutyOn);
 
                 const dutyOffStatus =
-                    getDutyOffStatus(record.dutyOff);
+                    getDutyOffStatus(
+                        record.dutyOff,
+                        record.salesCategory
+                    );
 
                 const distanceStatus =
-                    getDistanceStatus(Number(record.distance));
+                    getDistanceStatus(
+                        Number(record.distance)
+                    );
+
+                const gap =
+                    calculateTimeGap(
+                        record.dutyOn,
+                        record.firstActionTime
+                    );
 
                 html += `
 
@@ -568,6 +700,18 @@ function renderCategoryWiseReport(){
                             ${dutyOnStatus.text}
                         </td>
 
+                        <td>
+                            ${record.firstActionTime || "NO RECORD"}
+                        </td>
+
+                        <td>
+                            ${record.actionType || "-"}
+                        </td>
+
+                        <td>
+                            ${gap}
+                        </td>
+
                         <td class="${dutyOffStatus.className}">
                             ${record.dutyOff ? record.dutyOff : "NO RECORD"}
                         </td>
@@ -576,7 +720,9 @@ function renderCategoryWiseReport(){
                             ${dutyOffStatus.text}
                         </td>
 
-                        <td>${record.areaVisit}</td>
+                        <td>
+                            ${record.areaVisit}
+                        </td>
 
                         <td class="${distanceStatus.className}">
                             ${record.distance} KM
@@ -634,9 +780,11 @@ function editRecord(index){
 
     if(record.dutyOn){
 
-        document.getElementById("dutyOnType").value = "TIME";
+        document.getElementById("dutyOnType").value =
+            "TIME";
 
-        document.getElementById("dutyOn").disabled = false;
+        document.getElementById("dutyOn").disabled =
+            false;
 
         document.getElementById("dutyOn").value =
             record.dutyOn;
@@ -648,15 +796,18 @@ function editRecord(index){
 
         document.getElementById("dutyOn").value = "";
 
-        document.getElementById("dutyOn").disabled = true;
+        document.getElementById("dutyOn").disabled =
+            true;
 
     }
 
     if(record.dutyOff){
 
-        document.getElementById("dutyOffType").value = "TIME";
+        document.getElementById("dutyOffType").value =
+            "TIME";
 
-        document.getElementById("dutyOff").disabled = false;
+        document.getElementById("dutyOff").disabled =
+            false;
 
         document.getElementById("dutyOff").value =
             record.dutyOff;
@@ -668,9 +819,16 @@ function editRecord(index){
 
         document.getElementById("dutyOff").value = "";
 
-        document.getElementById("dutyOff").disabled = true;
+        document.getElementById("dutyOff").disabled =
+            true;
 
     }
+
+    document.getElementById("firstActionTime").value =
+        record.firstActionTime;
+
+    document.getElementById("actionType").value =
+        record.actionType;
 
     document.getElementById("areaVisit").value =
         record.areaVisit;
@@ -688,7 +846,9 @@ function editRecord(index){
 function updateRecord(){
 
     if(editIndex === -1){
+
         return;
+
     }
 
     records[editIndex] = getFormData();
@@ -749,11 +909,14 @@ function downloadPNG(){
         document.querySelector("#reportSection")
     ).then(canvas => {
 
-        const link = document.createElement("a");
+        const link =
+            document.createElement("a");
 
-        link.download = "Duty_On_Off_Report.png";
+        link.download =
+            "Duty_On_Off_Report.png";
 
-        link.href = canvas.toDataURL();
+        link.href =
+            canvas.toDataURL();
 
         link.click();
 
@@ -765,3 +928,4 @@ function downloadPNG(){
 
 </body>
 </html>
+```
