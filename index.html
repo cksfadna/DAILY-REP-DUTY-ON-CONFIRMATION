@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,14 +11,14 @@
 <style>
 
 body{
-    font-family: Arial, sans-serif;
+    font-family:Arial,sans-serif;
     background:#f4f6f9;
     margin:0;
     padding:20px;
 }
 
 .container{
-    max-width:1600px;
+    max-width:1700px;
     margin:auto;
 }
 
@@ -56,7 +55,7 @@ label{
     margin-bottom:5px;
 }
 
-input, select{
+input,select{
     width:100%;
     padding:10px;
     border:1px solid #ccc;
@@ -90,18 +89,6 @@ button{
 
 .update-btn{
     background:#ff9800;
-}
-
-.edit-btn{
-    background:#0d6efd;
-    padding:8px 12px;
-    font-size:13px;
-}
-
-.delete-btn{
-    background:#dc3545;
-    padding:8px 12px;
-    font-size:13px;
 }
 
 button:hover{
@@ -153,7 +140,7 @@ table{
     margin-top:10px;
 }
 
-th, td{
+th,td{
     border:1px solid #ddd;
     padding:10px;
     text-align:center;
@@ -287,6 +274,12 @@ th{
                 <label>Distance from Starting Town (KM)</label>
 
                 <input type="number" id="distance">
+            </div>
+
+            <div>
+                <label>Comment</label>
+
+                <input type="text" id="comment">
             </div>
 
         </div>
@@ -432,7 +425,7 @@ function getDutyOffStatus(time, category){
     // Direct Trade
     if(category === "Direct Trade"){
 
-        if(time >= "16:30" && time <= "17:00"){
+        if(time >= "16:30" && time <= "20:00"){
 
             return {
                 text:"IN TIME",
@@ -520,6 +513,18 @@ function calculateTimeGap(dutyOn, firstAction){
 
 function getFormData(){
 
+    let firstActionTime =
+        document.getElementById("firstActionTime").value;
+
+    let actionType =
+        document.getElementById("actionType").value;
+
+    if(!firstActionTime){
+
+        actionType = "Not Available";
+
+    }
+
     return {
 
         repName:
@@ -537,10 +542,10 @@ function getFormData(){
             : document.getElementById("dutyOn").value,
 
         firstActionTime:
-            document.getElementById("firstActionTime").value,
+            firstActionTime,
 
         actionType:
-            document.getElementById("actionType").value,
+            actionType,
 
         dutyOff:
             document.getElementById("dutyOffType").value === "NO RECORD"
@@ -551,7 +556,10 @@ function getFormData(){
             document.getElementById("areaVisit").value,
 
         distance:
-            document.getElementById("distance").value
+            document.getElementById("distance").value,
+
+        comment:
+            document.getElementById("comment").value
 
     };
 
@@ -570,6 +578,8 @@ function clearForm(){
     document.getElementById("areaVisit").value = "";
 
     document.getElementById("distance").value = "";
+
+    document.getElementById("comment").value = "";
 
     document.getElementById("actionType").selectedIndex = 0;
 
@@ -649,7 +659,7 @@ function renderCategoryWiseReport(){
                             <th>Area of Visit</th>
                             <th>Distance</th>
                             <th>Distance Status</th>
-                            <th>Actions</th>
+                            <th>Comment</th>
 
                         </tr>
 
@@ -660,9 +670,6 @@ function renderCategoryWiseReport(){
             `;
 
             filtered.forEach(record => {
-
-                const actualIndex =
-                    records.indexOf(record);
 
                 const dutyOnStatus =
                     getDutyOnStatus(record.dutyOn);
@@ -693,7 +700,7 @@ function renderCategoryWiseReport(){
                         <td>${record.date}</td>
 
                         <td class="${dutyOnStatus.className}">
-                            ${record.dutyOn ? record.dutyOn : "NO RECORD"}
+                            ${record.dutyOn || "NO RECORD"}
                         </td>
 
                         <td class="${dutyOnStatus.className}">
@@ -705,7 +712,7 @@ function renderCategoryWiseReport(){
                         </td>
 
                         <td>
-                            ${record.actionType || "-"}
+                            ${record.actionType}
                         </td>
 
                         <td>
@@ -713,7 +720,7 @@ function renderCategoryWiseReport(){
                         </td>
 
                         <td class="${dutyOffStatus.className}">
-                            ${record.dutyOff ? record.dutyOff : "NO RECORD"}
+                            ${record.dutyOff || "NO RECORD"}
                         </td>
 
                         <td class="${dutyOffStatus.className}">
@@ -733,17 +740,7 @@ function renderCategoryWiseReport(){
                         </td>
 
                         <td>
-
-                            <button class="edit-btn"
-                                onclick="editRecord(${actualIndex})">
-                                Edit
-                            </button>
-
-                            <button class="delete-btn"
-                                onclick="deleteRecord(${actualIndex})">
-                                Delete
-                            </button>
-
+                            ${record.comment || "-"}
                         </td>
 
                     </tr>
@@ -828,13 +825,18 @@ function editRecord(index){
         record.firstActionTime;
 
     document.getElementById("actionType").value =
-        record.actionType;
+        record.actionType === "Not Available"
+        ? "Call"
+        : record.actionType;
 
     document.getElementById("areaVisit").value =
         record.areaVisit;
 
     document.getElementById("distance").value =
         record.distance;
+
+    document.getElementById("comment").value =
+        record.comment || "";
 
     editIndex = index;
 
@@ -861,18 +863,6 @@ function updateRecord(){
 
     document.getElementById("updateButton")
         .classList.add("hidden");
-
-}
-
-function deleteRecord(index){
-
-    if(confirm("Delete this record?")){
-
-        records.splice(index,1);
-
-        renderCategoryWiseReport();
-
-    }
 
 }
 
@@ -928,4 +918,3 @@ function downloadPNG(){
 
 </body>
 </html>
-```
