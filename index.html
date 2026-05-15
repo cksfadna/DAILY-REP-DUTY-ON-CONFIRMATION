@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Duty On / Off Report Portal</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 
@@ -18,7 +21,7 @@ body{
 }
 
 .container{
-    max-width:1700px;
+    max-width:1800px;
     margin:auto;
 }
 
@@ -89,6 +92,23 @@ button{
 
 .update-btn{
     background:#ff9800;
+}
+
+.action-btn{
+    padding:8px 12px;
+    border:none;
+    border-radius:5px;
+    color:white;
+    cursor:pointer;
+    margin:2px;
+}
+
+.edit-btn{
+    background:#0d6efd;
+}
+
+.delete-btn{
+    background:#dc3545;
 }
 
 button:hover{
@@ -168,7 +188,12 @@ th{
     display:none;
 }
 
+.hide-download{
+    display:table-cell;
+}
+
 </style>
+
 </head>
 
 <body>
@@ -299,6 +324,11 @@ th{
             Download PNG
         </button>
 
+        <button class="download-btn"
+            onclick="downloadPDF()">
+            Download PDF
+        </button>
+
         <button class="reset-btn"
             onclick="resetReport()">
             Reset Report
@@ -349,7 +379,6 @@ function toggleDutyOn(){
     if(type === "NO RECORD"){
 
         input.value = "";
-
         input.disabled = true;
 
     }else{
@@ -371,7 +400,6 @@ function toggleDutyOff(){
     if(type === "NO RECORD"){
 
         input.value = "";
-
         input.disabled = true;
 
     }else{
@@ -384,7 +412,7 @@ function toggleDutyOff(){
 
 function getDutyOnStatus(time){
 
-    if(!time || time.trim() === ""){
+    if(!time){
 
         return {
             text:"NO RECORD",
@@ -400,20 +428,18 @@ function getDutyOnStatus(time){
             className:"green"
         };
 
-    }else{
-
-        return {
-            text:"LATE",
-            className:"red"
-        };
-
     }
+
+    return {
+        text:"LATE",
+        className:"red"
+    };
 
 }
 
 function getDutyOffStatus(time, category){
 
-    if(!time || time.trim() === ""){
+    if(!time){
 
         return {
             text:"NO RECORD",
@@ -432,14 +458,12 @@ function getDutyOffStatus(time, category){
                 className:"green"
             };
 
-        }else{
-
-            return {
-                text:"OUT OF RANGE",
-                className:"red"
-            };
-
         }
+
+        return {
+            text:"OUT OF RANGE",
+            className:"red"
+        };
 
     }
 
@@ -451,14 +475,12 @@ function getDutyOffStatus(time, category){
             className:"green"
         };
 
-    }else{
-
-        return {
-            text:"OUT OF RANGE",
-            className:"red"
-        };
-
     }
+
+    return {
+        text:"OUT OF RANGE",
+        className:"red"
+    };
 
 }
 
@@ -471,14 +493,12 @@ function getDistanceStatus(distance){
             className:"red"
         };
 
-    }else{
-
-        return {
-            text:"NORMAL",
-            className:"green"
-        };
-
     }
+
+    return {
+        text:"NORMAL",
+        className:"green"
+    };
 
 }
 
@@ -568,27 +588,19 @@ function getFormData(){
 function clearForm(){
 
     document.getElementById("date").value = "";
-
     document.getElementById("dutyOn").value = "";
-
     document.getElementById("firstActionTime").value = "";
-
     document.getElementById("dutyOff").value = "";
-
     document.getElementById("areaVisit").value = "";
-
     document.getElementById("distance").value = "";
-
     document.getElementById("comment").value = "";
 
     document.getElementById("actionType").selectedIndex = 0;
 
     document.getElementById("dutyOnType").value = "TIME";
-
     document.getElementById("dutyOffType").value = "TIME";
 
     document.getElementById("dutyOn").disabled = false;
-
     document.getElementById("dutyOff").disabled = false;
 
 }
@@ -600,7 +612,6 @@ function addRecord(){
     if(!data.date || !data.areaVisit || !data.distance){
 
         alert("Please fill required fields");
-
         return;
 
     }
@@ -637,39 +648,43 @@ function renderCategoryWiseReport(){
 
             html += `
 
-                <div class="category-title">
-                    ${category}
-                </div>
+            <div class="category-title">
+                ${category}
+            </div>
 
-                <table>
+            <table>
 
-                    <thead>
+                <thead>
 
-                        <tr>
+                    <tr>
 
-                            <th>Rep Name</th>
-                            <th>Date</th>
-                            <th>Duty On</th>
-                            <th>Duty On Status</th>
-                            <th>First Action Time</th>
-                            <th>Action Type</th>
-                            <th>Duty On → First Action Gap</th>
-                            <th>Duty Off</th>
-                            <th>Duty Off Status</th>
-                            <th>Area of Visit</th>
-                            <th>Distance</th>
-                            <th>Distance Status</th>
-                            <th>Comment</th>
+                        <th>Rep Name</th>
+                        <th>Date</th>
+                        <th>Duty On</th>
+                        <th>Duty On Status</th>
+                        <th>First Action Time</th>
+                        <th>Action Type</th>
+                        <th>Duty On → First Action Gap</th>
+                        <th>Duty Off</th>
+                        <th>Duty Off Status</th>
+                        <th>Area of Visit</th>
+                        <th>Distance</th>
+                        <th>Distance Status</th>
+                        <th>Comment</th>
+                        <th class="hide-download">Actions</th>
 
-                        </tr>
+                    </tr>
 
-                    </thead>
+                </thead>
 
-                    <tbody>
+                <tbody>
 
             `;
 
             filtered.forEach(record => {
+
+                const actualIndex =
+                    records.indexOf(record);
 
                 const dutyOnStatus =
                     getDutyOnStatus(record.dutyOn);
@@ -693,65 +708,79 @@ function renderCategoryWiseReport(){
 
                 html += `
 
-                    <tr>
+                <tr>
 
-                        <td>${record.repName}</td>
+                    <td>${record.repName}</td>
 
-                        <td>${record.date}</td>
+                    <td>${record.date}</td>
 
-                        <td class="${dutyOnStatus.className}">
-                            ${record.dutyOn || "NO RECORD"}
-                        </td>
+                    <td class="${dutyOnStatus.className}">
+                        ${record.dutyOn || "NO RECORD"}
+                    </td>
 
-                        <td class="${dutyOnStatus.className}">
-                            ${dutyOnStatus.text}
-                        </td>
+                    <td class="${dutyOnStatus.className}">
+                        ${dutyOnStatus.text}
+                    </td>
 
-                        <td>
-                            ${record.firstActionTime || "NO RECORD"}
-                        </td>
+                    <td>
+                        ${record.firstActionTime || "NO RECORD"}
+                    </td>
 
-                        <td>
-                            ${record.actionType}
-                        </td>
+                    <td>
+                        ${record.actionType}
+                    </td>
 
-                        <td>
-                            ${gap}
-                        </td>
+                    <td>
+                        ${gap}
+                    </td>
 
-                        <td class="${dutyOffStatus.className}">
-                            ${record.dutyOff || "NO RECORD"}
-                        </td>
+                    <td class="${dutyOffStatus.className}">
+                        ${record.dutyOff || "NO RECORD"}
+                    </td>
 
-                        <td class="${dutyOffStatus.className}">
-                            ${dutyOffStatus.text}
-                        </td>
+                    <td class="${dutyOffStatus.className}">
+                        ${dutyOffStatus.text}
+                    </td>
 
-                        <td>
-                            ${record.areaVisit}
-                        </td>
+                    <td>
+                        ${record.areaVisit}
+                    </td>
 
-                        <td class="${distanceStatus.className}">
-                            ${record.distance} KM
-                        </td>
+                    <td class="${distanceStatus.className}">
+                        ${record.distance} KM
+                    </td>
 
-                        <td class="${distanceStatus.className}">
-                            ${distanceStatus.text}
-                        </td>
+                    <td class="${distanceStatus.className}">
+                        ${distanceStatus.text}
+                    </td>
 
-                        <td>
-                            ${record.comment || "-"}
-                        </td>
+                    <td>
+                        ${record.comment || "-"}
+                    </td>
 
-                    </tr>
+                    <td class="hide-download">
+
+                        <button class="action-btn edit-btn"
+                            onclick="editRecord(${actualIndex})">
+                            Edit
+                        </button>
+
+                        <button class="action-btn delete-btn"
+                            onclick="deleteRecord(${actualIndex})">
+                            Delete
+                        </button>
+
+                    </td>
+
+                </tr>
 
                 `;
 
             });
 
             html += `
-                    </tbody>
-                </table>
+                </tbody>
+            </table>
             `;
         }
 
@@ -866,6 +895,18 @@ function updateRecord(){
 
 }
 
+function deleteRecord(index){
+
+    if(confirm("Delete this record?")){
+
+        records.splice(index,1);
+
+        renderCategoryWiseReport();
+
+    }
+
+}
+
 function resetReport(){
 
     if(confirm("Reset all records?")){
@@ -884,6 +925,32 @@ function resetReport(){
 
 }
 
+function hideActionColumns(){
+
+    const hiddenColumns =
+        document.querySelectorAll(".hide-download");
+
+    hiddenColumns.forEach(col => {
+
+        col.style.display = "none";
+
+    });
+
+}
+
+function showActionColumns(){
+
+    const hiddenColumns =
+        document.querySelectorAll(".hide-download");
+
+    hiddenColumns.forEach(col => {
+
+        col.style.display = "";
+
+    });
+
+}
+
 function downloadPNG(){
 
     const now = new Date();
@@ -894,6 +961,8 @@ function downloadPNG(){
 
     document.getElementById("downloadTime").innerHTML =
         "Download Time : " + formattedTime;
+
+    hideActionColumns();
 
     html2canvas(
         document.querySelector("#reportSection")
@@ -909,6 +978,66 @@ function downloadPNG(){
             canvas.toDataURL();
 
         link.click();
+
+        showActionColumns();
+
+    });
+
+}
+
+async function downloadPDF(){
+
+    const now = new Date();
+
+    const formattedTime =
+        now.toLocaleDateString() + " " +
+        now.toLocaleTimeString();
+
+    document.getElementById("downloadTime").innerHTML =
+        "Download Time : " + formattedTime;
+
+    hideActionColumns();
+
+    const { jsPDF } = window.jspdf;
+
+    html2canvas(
+        document.querySelector("#reportSection"),
+        {
+            scale:2
+        }
+    ).then(canvas => {
+
+        const imgData =
+            canvas.toDataURL("image/png");
+
+        const pdf =
+            new jsPDF(
+                "l",
+                "mm",
+                "a4"
+            );
+
+        const pdfWidth =
+            pdf.internal.pageSize.getWidth();
+
+        const pdfHeight =
+            (canvas.height * pdfWidth) /
+            canvas.width;
+
+        pdf.addImage(
+            imgData,
+            "PNG",
+            0,
+            0,
+            pdfWidth,
+            pdfHeight
+        );
+
+        pdf.save(
+            "Duty_On_Off_Report.pdf"
+        );
+
+        showActionColumns();
 
     });
 
